@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Spigot Web Panel</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>Spigot Minecraft Panel</h1>
+
+  <div class="cards">
+    <div class="card">
+      <h2>CPU</h2>
+      <p id="cpu">0%</p>
+    </div>
+    <div class="card">
+      <h2>RAM</h2>
+      <p id="ram">0 MB</p>
+    </div>
+    <div class="card">
+      <h2>Oyuncular</h2>
+      <p id="players">0 / 0</p>
+    </div>
+    <div class="card">
+      <h2>TPS</h2>
+      <p id="tps">1m: 20 | 5m: 20 | 15m: 20</p>
+    </div>
+  </div>
+
+  <div class="console">
+    <h2>Konsol</h2>
+    <input type="text" id="commandInput" placeholder="Komut girin">
+    <button id="sendBtn">Gönder</button>
+    <pre id="consoleOutput"></pre>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
