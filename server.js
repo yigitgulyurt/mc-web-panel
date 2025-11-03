@@ -86,10 +86,18 @@ function parseTPS(str) {
 }
 
 // Veri güncelleme
+const os = require('os');
+const cores = os.cpus().length; // 8 çekirdekli cihaz için otomatik
+
 setInterval(async () => {
   try {
-    // CPU / RAM
     const stats = await pidusage(MINECRAFT_PID);
+
+    // CPU normalize et
+    const cpuPercent = Math.min((stats.cpu / cores), 100).toFixed(1);
+
+    // RAM
+    const ramMB = (stats.memory / 1024 / 1024).toFixed(1);
 
     // Oyuncular ve TPS
     let playersRaw = 'There are 0 of a max of 0 players online';
@@ -108,16 +116,18 @@ setInterval(async () => {
     const tpsData = parseTPS(tpsRaw);
 
     io.emit('serverData', {
-      cpu: stats.cpu.toFixed(1),
-      ram: (stats.memory / 1024 / 1024).toFixed(1),
+      cpu: cpuPercent,
+      ram: ramMB,
       players,
       tps: tpsData.tps,
       memory: tpsData.memory
     });
+
   } catch (err) {
-    console.error(err);
+    // Terminali temiz tutmak için uyarı mesajlarını yazma
   }
 }, 2000);
+
 
 server.listen(PORT, () => {
   console.log(`Panel çalışıyor: http://localhost:${PORT}`);
