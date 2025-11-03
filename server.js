@@ -1,3 +1,14 @@
+// server.js başına ekle
+const consoleWarn = console.warn;
+console.warn = (msg, ...args) => {
+  if (typeof msg === 'string' &&
+      (msg.includes("getconf CLK_TCK") || msg.includes("getconf PAGESIZE") ||
+       msg.includes("We couldn't find uptime"))) return;
+  consoleWarn(msg, ...args);
+};
+
+
+
 const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
@@ -94,7 +105,7 @@ setInterval(async () => {
     const stats = await pidusage(MINECRAFT_PID);
 
     // CPU normalize et
-    const cpuPercent = Math.min((stats.cpu / cores), 100).toFixed(1);
+    const cpuPercent = Math.min(stats.cpu, 100).toFixed(1);
 
     // RAM
     const ramMB = (stats.memory / 1024 / 1024).toFixed(1);
