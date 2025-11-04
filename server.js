@@ -26,8 +26,23 @@ const RCON_HOST = '127.0.0.1';
 const RCON_PORT = 25575;
 const RCON_PASSWORD = '';
 
+// PID otomatik bulma (opsiyonel)
+const { execSync } = require('child_process');
+function findJavaPid() {
+  try {
+    const out = execSync("ps aux | grep '[j]ava' | awk '{print $2, $11, $12}'", { encoding: 'utf8' });
+    const lines = out.trim().split('\n').filter(Boolean);
+    if (lines.length === 0) return 0;
+    // ilk satırdan pid al
+    const pid = parseInt(lines[0].split(/\s+/)[0]);
+    return pid || 0;
+  } catch (e) {
+    return 0;
+  }
+}
+
 // Minecraft PID (ps aux | grep java ile bul)
-const MINECRAFT_PID = 123456; // Burayı kendi PID'inle değiştir
+const MINECRAFT_PID = Number(process.env.MINECRAFT_PID || 0); // 0 => otomatik bul (aşağıda otomatik arama var)
 
 let rcon;
 
@@ -102,7 +117,24 @@ const cores = os.cpus().length; // 8 çekirdekli cihaz için otomatik
 
 setInterval(async () => {
   try {
-    const stats = await pidusage(MINECRAFT_PID);
+    // Otomatik PID bulma (eğer 0 ise)
+    let targetPid = MINECRAFT_PID;
+    if (targetPid === 0) {
+      targetPid = findJavaPid();
+      if (targetPid === 0) {
+        // Java process bulunamadı, boş veri gönder
+        io.emit('serverData', {
+          cpu: 0,
+          ram: 0,
+          players: { online: 0, max: 0, list: [] },
+          tps: { '1m': '-', '5m': '-', '15m': '-' },
+          memory: { used: '-', max: '-' }
+        });
+        return;
+      }
+    }
+    
+    const stats = await pidusage(targetPid);
 
     // CPU normalize et
     const cpuPercent = Math.min(stats.cpu, 100).toFixed(1);
